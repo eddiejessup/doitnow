@@ -22,37 +22,41 @@ def get_project_by_name(api, name):
 
 
 @click.group()
-def doit():
-    pass
+@click.option('--email',
+              help='The email address of the account.')
+@click.option('--config_path', default=DEFAULT_CONFIG_PATH,
+              type=click.Path(resolve_path=True),
+              help='Path to the doitnow configuration file, if any.')
+@click.option('--fresh/--no-fresh',
+              help='Start a new session even if cache exists.')
+@click.option('--debug/--no-debug',
+              help='Enable logging')
+@click.pass_context
+def doit(ctx, email, config_path, fresh, debug):
+    if debug:
+        logging.basicConfig(level=logging.INFO)
+    api = utils.get_api(email, config_path, fresh)
+    ctx.obj['api'] = api
+
 
 
 # Note: method on `doit`, not `click`, to attach sub-command.
 @doit.command()
 @click.argument('content')
-@click.option('--time', default='',
+@click.option('-t', '--time', default='',
               help='Task time.')
-@click.option('--project',
+@click.option('-p', '--project',
               help='Project to add task to.')
-@click.option('--email',
-              help='The email address of the account.')
-@click.option('--config_path', default=DEFAULT_CONFIG_PATH,
-              help='Path to the doitnow configuration file, if any.')
-@click.option('--fresh', is_flag=True,
-              help='Start a new session even if cache exists.')
-@click.option('--debug', is_flag=True,
-              help='Enable logging')
-def add(content, time, project, email, config_path, fresh, debug):
-    """Log in to Todoist account."""
-    if debug:
-        logging.basicConfig(level=logging.INFO)
-
-    api = utils.get_api(email, config_path, fresh)
+@click.pass_context
+def add(ctx, content, time, project):
+    """Add a task."""
+    api = ctx.obj['api']
     if project is not None:
         project_obj = get_project_by_name(api, project)
-        import pdb; pdb.set_trace()
+        project_id = project_obj['id']
     else:
         project_id = None
     api.items.add(content, project_id, date_string=time)
     api.commit()
 if __name__ == '__main__':
-    doit()
+    doit(obj={})
