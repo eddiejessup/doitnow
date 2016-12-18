@@ -1,0 +1,2 @@
+click==6.6
+-e git+git@github.com:Doist/todoist-python.git@2f8b7106bdb9f543b6bde0022e7045e3bdb2b2bb#egg=todoist_python
