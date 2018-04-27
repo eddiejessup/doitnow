@@ -62,3 +62,10 @@ def get_api(email, config_path, fresh):
         else:
             raise ValueError
     return api
+
+
+def get_project_by_name(api, name):
+    results = [r for r in api.state['projects'] if r['name'] == name]
+    if len(results) > 1:
+        raise ValueError('Multiple projects with this name')
+    return results[0]

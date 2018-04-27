@@ -14,13 +14,6 @@ DEFAULT_CACHE_PATH = expanduser('~/.todoist-cache')
 DEFAULT_CONFIG_PATH = expanduser('~/.doitrc')
 
 
-def get_project_by_name(api, name):
-    results = [r for r in api.state['projects'] if r['name'] == name]
-    if len(results) > 1:
-        raise ValueError('Multiple projects with this name')
-    return results[0]
-
-
 @click.group()
 @click.option('--email',
               help='The email address of the account.')
@@ -52,11 +45,13 @@ def add(ctx, content, time, project):
     """Add a task."""
     api = ctx.obj['api']
     if project is not None:
-        project_obj = get_project_by_name(api, project)
+        project_obj = utils.get_project_by_name(api, project)
         project_id = project_obj['id']
     else:
         project_id = None
     api.items.add(content, project_id, date_string=time)
     api.commit()
+
+
 if __name__ == '__main__':
     doit(obj={})
